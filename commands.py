@@ -3,7 +3,7 @@
 # See `LICENSE.txt` for license terms.
 
 from display import display_vote_bb
-import error
+import errstr
 from string import digits
 from util import diff_strings
 
@@ -43,10 +43,10 @@ def multimerge(mapping, froms, tos):
 	for from_vote in froms:
 		for some_to in tos:
 			if some_to==from_vote:
-				raise CommandError(error.MERGE_TO_SELF)
+				raise CommandError(errstr.MERGE_TO_SELF)
 
 		if mapping[primary_to].is_descendant_of(mapping[from_vote]):
-			raise CommandError(error.MERGE_TO_DESCENDANT)
+			raise CommandError(errstr.MERGE_TO_DESCENDANT)
 
 	# Now merge
 	for from_vote in froms:
@@ -61,16 +61,16 @@ def parse_line_numbers(split_str, mapping, force_plural = False):
 		out = [ int(i) for i in split_str ]
 	except ValueError:
 		if len(split_str) == 1 and not force_plural:
-			raise CommandError(error.INVALID_INDEX)
+			raise CommandError(errstr.INVALID_INDEX)
 		else:
-			raise CommandError(error.INVALID_INDICES)
+			raise CommandError(errstr.INVALID_INDICES)
 
 	for index in out:
 		if index < 0 or index >= len(mapping):
 			if len(split_str) == 1 and not force_plural:
-				raise CommandError(error.INVALID_INDEX)
+				raise CommandError(errstr.INVALID_INDEX)
 			else:
-				raise CommandError(error.INVALID_INDICES)
+				raise CommandError(errstr.INVALID_INDICES)
 
 	return out
 
@@ -78,9 +78,9 @@ def parse_line_number(str, mapping):
 	try:
 		out = int(str)
 	except ValueError:
-		raise CommandError(error.INVALID_INDEX)
+		raise CommandError(errstr.INVALID_INDEX)
 	if out < 0 or out >= len(mapping):
-		raise CommandError(error.INVALID_INDEX)
+		raise CommandError(errstr.INVALID_INDEX)
 	return out
 
 def wait_for_line(str=None):
@@ -95,7 +95,7 @@ class VoteOf(Command):
 	def go(self, args, model):
 		name = args.lower().replace(' ', '')
 		if name not in model.votes_for_user:
-			raise CommandError(error.UNKNOWN_USER)
+			raise CommandError(errstr.UNKNOWN_USER)
 		for line in model.votes_for_user[name]:
 			print line
 		print
@@ -112,7 +112,7 @@ class Merge(Command):
 		args = args.split()
 
 		if len(args) != 2:
-			raise CommandError(error.TOO_MANY_ARGUMENTS)
+			raise CommandError(errstr.TOO_MANY_ARGUMENTS)
 
 		from_idx, to_idx = parse_line_numbers(args, model.mapping)
 
@@ -129,7 +129,7 @@ class MultiMerge(Command):
 	def go(self, args, model):
 		arrow = args.find('>')
 		if arrow < 0:
-			raise CommandError(error.MULTIMERGE_NEEDS_ARROW)
+			raise CommandError(errstr.MULTIMERGE_NEEDS_ARROW)
 
 		froms = parse_line_numbers(args[:arrow].split(), model.mapping, True)
 		tos = parse_line_numbers(args[arrow+1:].split(), model.mapping, True)
@@ -200,10 +200,10 @@ class TypoJam(Command):
 		try:
 			idx = int(args)
 		except ValueError:
-			raise CommandError(error.INVALID_INDEX)
+			raise CommandError(errstr.INVALID_INDEX)
 
 		if idx<0 or idx >= len(mapping):
-			raise CommandError(error.INVALID_INDEX)
+			raise CommandError(errstr.INVALID_INDEX)
 
 		compare_raw = mapping[idx].primary_text.encode('utf-8')
 		compare_munge = self.translate(mapping[idx])
@@ -268,7 +268,7 @@ class TypoJam(Command):
 			try:
 				remove = [ int(a) for a in remove ]
 			except ValueError:
-				raise CommandError(error.INVALID_INDICES)
+				raise CommandError(errstr.INVALID_INDICES)
 				return
 			for value in remove:
 				if value not in ok_is:
@@ -322,11 +322,11 @@ class SetMath(Command):
 					digs += args[i]
 					i += 1
 				if not len(digs):
-					raise CommandError(error.SETMATH_LEX)
+					raise CommandError(errstr.SETMATH_LEX)
 				digs = int(digs)
 
 				if digs<0 or digs >= len(mapping):
-					raise CommandError(error.INVALID_INDEX)
+					raise CommandError(errstr.INVALID_INDEX)
 
 				if type == 'v':
 					selected = mapping[digs].yea | mapping[digs].nay
@@ -339,7 +339,7 @@ class SetMath(Command):
 			elif c == ' ':
 				continue
 			else:
-				raise CommandError(error.SETMATH_LEX)
+				raise CommandError(errstr.SETMATH_LEX)
 
 		left_operands = [ None ]
 		operators = [ None ]
@@ -347,14 +347,14 @@ class SetMath(Command):
 		for token, selected in tokens:
 			if token == '(':
 				if left_operands[-1] is not None and operators[-1] is None:
-					raise CommandError(error.SETMATH_PARSE+' (Open Parenthesis)')
+					raise CommandError(errstr.SETMATH_PARSE+' (Open Parenthesis)')
 				left_operands.append(None)
 				operators.append(None)
 			elif token == ')':
 				if len(left_operands) == 1 or left_operands[-1] is None:
-					raise CommandError(error.SETMATH_PARSE+' (Close Parenthesis)')
+					raise CommandError(errstr.SETMATH_PARSE+' (Close Parenthesis)')
 				if len(operators) == 1 or operators[-1] is not None:
-					raise CommandError(error.SETMATH_PARSE+' (Close Parenthesis)')
+					raise CommandError(errstr.SETMATH_PARSE+' (Close Parenthesis)')
 				result = left_operands[-1]
 				left_operands = left_operands[:-1]
 				operators = operators[:-1]
@@ -367,20 +367,20 @@ class SetMath(Command):
 					left_operands[-1] = result
 			elif token in ['+', '-', '&']:
 				if left_operands[-1] is None:
-					raise CommandError(error.SETMATH_PARSE+' (Operator)')
+					raise CommandError(errstr.SETMATH_PARSE+' (Operator)')
 				operators[-1] = token
 			elif token == 'set':
 				if left_operands[-1] is None:
 					left_operands[-1] = selected
 				else:
 					if operators[-1] is None:
-						raise CommandError(error.SETMATH_PARSE+' (Set)')
+						raise CommandError(errstr.SETMATH_PARSE+' (Set)')
 					left_operands[-1] = \
 						self.oper(left_operands[-1], operators[-1], selected)
 					operators[-1] = None
 
 		if len(left_operands) != 1 or operators[-1] is not None:
-			raise CommandError(error.SETMATH_PARSE, '(Exit)')
+			raise CommandError(errstr.SETMATH_PARSE, '(Exit)')
 
 		result = left_operands[-1]
 
@@ -450,7 +450,7 @@ class Help(Command):
 
 		if args:
 			if args not in COMMANDS:
-				print error.UNKNOWN_COMMAND
+				print errstr.UNKNOWN_COMMAND
 				print 'Use help to list all the known command names.'
 			else:
 				command = COMMANDS[args]
@@ -541,4 +541,4 @@ def run_console_command(vote, mapping, command, v4u):
 		except CommandError as e:
 			print e
 	else:
-		print error.UNKNOWN_COMMAND
+		print errstr.UNKNOWN_COMMAND

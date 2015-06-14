@@ -4,12 +4,11 @@
 
 from sys import stdout
 from time import sleep, time
-import argparse
+import argparse, errstr
 from string import digits
 
 from util import *
 from termutil import *
-from error import *
 from fetch import single_fetch_resolve_redirects, multi_fetch
 from scrape import max_page_number_from_page, posts_from_page, process_vote_from_posts
 from commands import run_console_command
@@ -66,13 +65,13 @@ if __name__ == '__main__':
 				('%.1fsec' % (time() - start))+CSI+'K'
 	except:
 		print
-		error(error.COULDNT_FETCH_INITIAL)
+		error(errstr.COULDNT_FETCH_INITIAL)
 		raise
 
 	dom = url_get_domain(start_uri)
 
 	if stop_uri and url_get_domain(stop_uri) != dom:
-		error(error.START_STOP_DOMAIN_MISMATCH)
+		error(errstr.START_STOP_DOMAIN_MISMATCH)
 		exit(1)
 
 	threadno, pageno, postno = get_url_info_or_die(start_uri)
@@ -83,10 +82,10 @@ if __name__ == '__main__':
 	else:
 		stop_threadno, stop_pageno, stop_postno = get_url_info_or_die(stop_uri)
 		if stop_threadno != threadno:
-			error(error.START_STOP_THREAD_MISMATCH)
+			error(errstr.START_STOP_THREAD_MISMATCH)
 			exit(1)
 		if stop_pageno < pageno or stop_postno < postno:
-			error(error.STOP_BEFORE_START)
+			error(errstr.STOP_BEFORE_START)
 			exit(1)
 		max_page = stop_pageno-1
 		max_post = stop_postno
@@ -115,7 +114,7 @@ if __name__ == '__main__':
 				posts.append(post)
 
 	if not has_id:
-		acknowledge_warning(error.COULDNT_FIND_NAMED_POST)
+		acknowledge_warning(errstr.COULDNT_FIND_NAMED_POST)
 
 	v, votes_for_user = process_vote_from_posts(posts)
 
