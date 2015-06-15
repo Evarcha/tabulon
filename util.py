@@ -86,7 +86,7 @@ def get_url_info_or_die(url):
 #################
 
 def warning(str):
-	print '['+sgr(FG_RED, BOLD, BLINK)+'!'+sgr()+'] '+sgr(FG_RED, BOLD)+\
+	print '['+sgr(FG_YEL, BOLD, BLINK)+'!'+sgr()+'] '+sgr(FG_YEL, BOLD)+\
 		'WARNING'+sgr()+': '+str
 
 def acknowledge_warning(str):

@@ -7,21 +7,51 @@
 ####################
 
 class MergeableVote:
-	def __init__(self, iv, parent):
-		self.parent = parent
-		self.yea = iv.yea
-		self.nay = iv.nay
-		self.primary_text = iv.text
-		self.texts = set([iv.text])
-		self.subs = [
-			MergeableVote(sub, self)
-				for sub in iv.subs.values()
-				if len(sub.yea) or len(sub.nay)
-		]
-		self.sort()
+	def __init__(self, iv=None, parent=None, text=None):
+		if text is not None:
+			self.parent = parent
+			self.primary_text = text
+			self.texts = set(text)
+			self.subs = []
+			self.yea = set()
+			self.nay = set()
+		else:
+			self.parent = parent
+			self.yea = iv.yea
+			self.nay = iv.nay
+			self.primary_text = iv.text
+			self.texts = set([iv.text])
+			self.subs = [
+				MergeableVote(sub, self)
+					for sub in iv.subs.values()
+					if len(sub.yea) or len(sub.nay)
+			]
+			self.sort()
 
 	def sort(self):
 		self.subs.sort(key=lambda v: -len(v.yea))
+
+	def rename(self, new_text):
+		self.texts.add(new_text)
+		self.primary_text = new_text
+
+	def _trickle(self, other):
+		self.yea.update(other.yea)
+		self.nay.update(other.nay)
+		for sub in other.subs:
+			self._trickle(sub)
+
+	def trickle(self):
+		for sub in self.subs:
+			self._trickle(sub)
+		self.nay.difference_update(self.yea)
+		self.parent.sort()
+
+	def recursive_children(self):
+		out = list(self.subs)
+		for sub in self.subs:
+			out += sub.recursive_children()
+		return out
 
 	def is_descendant_of(self, other):
 		p = self
@@ -34,39 +64,54 @@ class MergeableVote:
 	def remove_self(self):
 		if self.parent:
 			self.parent.subs.remove(self)
+			self.parent = None
+
+	def add(self, other):
+		other.remove_self()
+
+		merged = False
+		for sub in self.subs:
+			if sub.primary_text == other.primary_text:
+				merged = True
+				sub.merge(other)
+				break
+
+		if not merged:
+			other.parent = self
+			self.subs.append(other)
+			self.sort()
 
 	# copy the other vote's yeas/nays and text into this vote
 	# this is used as part of a multimerge
 	def copy(self, other):
 		assert other != self
-	
+
 		self.yea.update(other.yea)
 		self.nay.update(other.nay)
 		self.nay.difference_update(self.yea)
-		self.texts.update(other.texts)		
+		self.texts.update(other.texts)
 
+		if self.parent:
+			self.parent.sort()
+
+	def invert(self):
+		self.yea, self.nay = self.nay, self.yea
 		if self.parent:
 			self.parent.sort()
 
 	def merge(self, other):
 		assert other != self
 		assert not self.is_descendant_of(other)
-		if other.parent:
-			other.parent.subs.remove(other)
-	
+		other.remove_self()
+
 		self.yea.update(other.yea)
 		self.nay.update(other.nay)
 		self.nay.difference_update(self.yea)
 		self.texts.update(other.texts)
 
 		for other_sub in other.subs:
-			out = other_sub
-			for my_sub in list(self.subs):
-				if my_sub.primary_text == out.primary_text:
-					out.merge(my_sub)
-			out.parent = self
-			self.subs.append(out)
-		
+			self.add(other_sub)
+
 		self.sort()
 		if self.parent:
 			self.parent.sort()
