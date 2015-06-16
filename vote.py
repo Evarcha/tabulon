@@ -26,9 +26,9 @@ class MergeableVote:
 					for sub in iv.subs.values()
 					if len(sub.yea) or len(sub.nay)
 			]
-			self.sort()
+			self._sort()
 
-	def sort(self):
+	def _sort(self):
 		self.subs.sort(key=lambda v: -len(v.yea))
 
 	def rename(self, new_text):
@@ -45,7 +45,7 @@ class MergeableVote:
 		for sub in self.subs:
 			self._trickle(sub)
 		self.nay.difference_update(self.yea)
-		self.parent.sort()
+		self.parent._sort()
 
 	def recursive_children(self):
 		out = list(self.subs)
@@ -79,7 +79,7 @@ class MergeableVote:
 		if not merged:
 			other.parent = self
 			self.subs.append(other)
-			self.sort()
+			self._sort()
 
 	# copy the other vote's yeas/nays and text into this vote
 	# this is used as part of a multimerge
@@ -92,12 +92,12 @@ class MergeableVote:
 		self.texts.update(other.texts)
 
 		if self.parent:
-			self.parent.sort()
+			self.parent._sort()
 
 	def invert(self):
 		self.yea, self.nay = self.nay, self.yea
 		if self.parent:
-			self.parent.sort()
+			self.parent._sort()
 
 	def merge(self, other):
 		assert other != self
@@ -109,12 +109,12 @@ class MergeableVote:
 		self.nay.difference_update(self.yea)
 		self.texts.update(other.texts)
 
-		for other_sub in other.subs:
+		for other_sub in list(other.subs):
 			self.add(other_sub)
 
-		self.sort()
+		self._sort()
 		if self.parent:
-			self.parent.sort()
+			self.parent._sort()
 
 	def __repr__(self):
 		return ('<MergeableVote +%d -%d ' % (len(self.yea), len(self.nay)))+	\
