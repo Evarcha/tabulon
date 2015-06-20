@@ -10,8 +10,10 @@ from string import digits
 from util import *
 from termutil import *
 from fetch import single_fetch_resolve_redirects, multi_fetch
-from scrape import max_page_number_from_page, posts_from_page, process_vote_from_posts
+from scrape import \
+	max_page_number_from_page, posts_from_page, process_vote_from_posts
 from commands import run_console_command
+from commands_undo import UndoStack
 from display import display_vote
 
 ###############
@@ -117,6 +119,7 @@ if __name__ == '__main__':
 		acknowledge_warning(errstr.COULDNT_FIND_NAMED_POST)
 
 	v, votes_for_user = process_vote_from_posts(posts)
+	us = UndoStack(v)
 
 	sleep(1)
 
@@ -130,6 +133,6 @@ if __name__ == '__main__':
 		print
 		command = raw_input("> ").strip()
 
-		run_console_command(v, mapping, command, votes_for_user)
+		v = run_console_command(v, us, mapping, command, votes_for_user)
 
 		sleep(1)

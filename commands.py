@@ -9,6 +9,7 @@ from command_util import *
 from commands_arrange import *
 from commands_info import *
 from commands_advanced import *
+from commands_undo import *
 
 class Help(Command):
 	def names(self):
@@ -92,6 +93,8 @@ COMMAND_LIST = [
 	TypoJam(),
 	SetMath(),
 	BBCode(),
+	Undo(),
+	Redo(),
 	Quit(),
 	Help(),
 ]
@@ -109,8 +112,10 @@ def _generate_commands_array():
 
 _generate_commands_array()
 
-def run_console_command(vote, mapping, command, v4u):
+def run_console_command(vote, undo_stack, mapping, command, v4u):
 	global COMMANDS
+
+	model = CommandModel(vote, mapping, v4u, undo_stack)
 
 	space = command.find(' ')
 	args = ''
@@ -121,9 +126,12 @@ def run_console_command(vote, mapping, command, v4u):
 
 	if command in COMMANDS:
 		try:
-			COMMANDS[command].go(args, CommandModel(vote, mapping, v4u))
+			COMMANDS[command].go(args, model)
 		except CommandError as e:
 			print e
 			wait_for_line()
 	else:
 		print errstr.UNKNOWN_COMMAND
+
+	undo_stack.update()
+	return model.vote

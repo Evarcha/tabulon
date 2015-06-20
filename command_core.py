@@ -9,10 +9,11 @@ class CommandError(Exception):
 		return self.message
 
 class CommandModel(object):
-	def __init__(self, vote, mapping, votes_for_user):
+	def __init__(self, vote, mapping, votes_for_user, undo_stack):
 		self.vote = vote
 		self.mapping = mapping
 		self.votes_for_user = votes_for_user
+		self.undo_stack = undo_stack
 
 class Command(object):
 	def names(self):

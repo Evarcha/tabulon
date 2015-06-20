@@ -30,3 +30,6 @@ FIND_REPLACE_BAD_FORMAT = 'That regex wasn\'t in the right format for Find/Repla
 TOO_MANY_PREFIXES = 'There are too many prefixes on one of those line numbers.'
 REGEX_ERROR = 'That regular expression was badly formatted.'
 BAD_SET = 'That wasn\'t a valid set name for this command.'
+NO_ARGUMENTS_NEEDED = 'That command doesn\'t take any arguments.'
+NOTHING_TO_UNDO = 'Nothing has changed that can be undone.'
+NOTHING_TO_REDO = 'Nothing has been undone that can be redone.'

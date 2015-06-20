@@ -8,6 +8,7 @@
 
 class MergeableVote:
 	def __init__(self, iv=None, parent=None, text=None):
+		self.stack = None
 		if text is not None:
 			self.parent = parent
 			self.primary_text = text
@@ -28,10 +29,29 @@ class MergeableVote:
 			]
 			self._sort()
 
+	# should only be called from UndoStack
+	def _set_stack(self, stack):
+		self.stack = stack
+
+	def dirty(self):
+		if self.parent:
+			self.parent.dirty()
+		elif self.stack:
+			self.stack.dirty()
+
 	def _sort(self):
 		self.subs.sort(key=lambda v: -len(v.yea))
 
+	def defrost(self):
+		# eventually, this will contain logic to help MergeableVote "awaken" from a
+		# deep copy operation, and then call defrost on its children, for instance
+		#for sub in self.subs:
+		#	sub.defrost()
+		# but for now there's nothing to do but
+		pass
+
 	def rename(self, new_text):
+		self.dirty()
 		self.texts.add(new_text)
 		self.primary_text = new_text
 
@@ -42,6 +62,7 @@ class MergeableVote:
 			self._trickle(sub)
 
 	def trickle(self):
+		self.dirty()
 		for sub in self.subs:
 			self._trickle(sub)
 		self.nay.difference_update(self.yea)
@@ -62,11 +83,13 @@ class MergeableVote:
 		return False
 
 	def remove_self(self):
+		self.dirty()
 		if self.parent:
 			self.parent.subs.remove(self)
 			self.parent = None
 
 	def add(self, other):
+		self.dirty()
 		other.remove_self()
 
 		merged = False
@@ -84,6 +107,7 @@ class MergeableVote:
 	# copy the other vote's yeas/nays and text into this vote
 	# this is used as part of a multimerge
 	def copy(self, other):
+		self.dirty()
 		assert other != self
 
 		self.yea.update(other.yea)
@@ -95,11 +119,13 @@ class MergeableVote:
 			self.parent._sort()
 
 	def invert(self):
+		self.dirty()
 		self.yea, self.nay = self.nay, self.yea
 		if self.parent:
 			self.parent._sort()
 
 	def merge(self, other):
+		self.dirty()
 		assert other != self
 		assert not self.is_descendant_of(other)
 		other.remove_self()

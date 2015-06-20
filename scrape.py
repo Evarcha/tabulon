@@ -83,7 +83,6 @@ def extract_vote_lines(text):
 ##################
 
 WARN_UNKNOWN_VOTE_TYPE = 'you used an unknown vote type'
-WARN_EMPTY_VOTE_TYPE = 'you didn\'t put anything in the vote brackets'
 
 POSITIVE_VOTE_LINE_TYPES = ['X', 'Y']
 NEGATIVE_VOTE_LINE_TYPES = ['N']
