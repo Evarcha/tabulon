@@ -19,8 +19,10 @@ class UndoStack(object):
 		self.current = vote
 		vote._set_stack(self)
 		self.is_dirty = False
+
 	def dirty(self):
 		self.is_dirty = True
+
 	def update(self):
 		if self.is_dirty:
 			self.is_dirty = False
@@ -29,6 +31,7 @@ class UndoStack(object):
 			self.current._set_stack(None)
 			self.current_copy = deepcopy(self.current)
 			self.current._set_stack(self)
+
 	def undo(self):
 		assert len(self.undo_list) > 0
 		assert not self.is_dirty
@@ -38,8 +41,8 @@ class UndoStack(object):
 		self.current_copy = deepcopy(new)
 		self.current = new
 		self.current._set_stack(self)
-		self.current.defrost()
 		return self.current
+
 	def redo(self):
 		assert len(self.redo_list) > 0
 		assert not self.is_dirty
@@ -49,12 +52,17 @@ class UndoStack(object):
 		self.current_copy = deepcopy(new)
 		self.current = new
 		self.current._set_stack(self)
-		self.current.defrost()
 		return self.current
+
 	def has_undo(self):
 		return len(self.undo_list) > 0
+
 	def has_redo(self):
 		return len(self.redo_list) > 0
+
+	def teardown(self):
+		# call this before pickling the vote
+		self.current._set_stack(None)
 
 class Undo(Command):
 	def names(self):

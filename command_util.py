@@ -7,6 +7,10 @@ from command_core import *
 from setmath import setmath
 import errstr
 
+###################################
+## Helper Functions for Commands ##
+###################################
+
 def move(mapping, from_vote, to_vote):
 	if from_vote == to_vote:
 		raise CommandError(errstr.MOVE_TO_SELF)

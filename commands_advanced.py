@@ -189,8 +189,8 @@ class RegexMoveRename(Command):
 		return 'Move and rename items according to a regex.'
 	def usage(self):
 		return [
-			r"rmove r0 1 /^Flee (east|west)!/Run \1!/",
-			'rmove R0-r26 27 '+\
+			r"moveregex r0 1 /^Flee (east|west)!/Run \1!/",
+			'moveregex R0-r26 27 '+\
 				r"/Tay?lor's (?:cape )?name [sa]hould be ([^.]*)\.?/\1/"
 		]
 	def go(self, args, model):

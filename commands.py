@@ -12,6 +12,7 @@ from commands_advanced import *
 from commands_undo import *
 
 class Help(Command):
+	show_unlisted = False
 	def names(self):
 		return ['help', '?']
 	def description(self):
@@ -51,6 +52,9 @@ class Help(Command):
 			print 'Tabulon Commands:'
 			print
 			for command in COMMAND_LIST:
+				if command.unlisted() and not self.show_unlisted:
+					continue
+
 				names = command.names()
 
 				out = '  '+names[0]
@@ -66,11 +70,22 @@ class Help(Command):
 			print
 		wait_for_line()
 
+class UnlistedHelp(Help):
+	show_unlisted = True
+	def names(self):
+		return ['uhelp', 'u?']
+	def unlisted(self):
+		return True
+	def description(self):
+		return 'Helps you figure out how to use Tabulon, including its unlisted '+\
+			'commands.'
+
 class Quit(Command):
 	def names(self):
 		return ['quit']
 	def go(self, args, model):
-		exit(0)
+		# pretend the user typed control-C
+		raise KeyboardInterrupt()
 	def description(self):
 		return 'Close Tabulon.'
 	def usage(self):
@@ -82,14 +97,15 @@ COMMAND_LIST = [
 	MultiMerge(),
 	Invert(),
 	Move(),
+	Remove(),
 	Rename(),
 	MoveRename(),
 	RegexMoveRename(),
 	Trickle(),
+	Recompute(),
 	Blame(),
 	Info(),
 	VoteOf(),
-	Remove(),
 	TypoJam(),
 	SetMath(),
 	BBCode(),
@@ -97,6 +113,7 @@ COMMAND_LIST = [
 	Redo(),
 	Quit(),
 	Help(),
+	UnlistedHelp(),
 ]
 
 def _generate_commands_array():

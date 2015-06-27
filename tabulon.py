@@ -10,15 +10,20 @@ from string import digits
 from util import *
 from termutil import *
 from fetch import single_fetch_resolve_redirects, multi_fetch
-from scrape import \
-	max_page_number_from_page, posts_from_page, process_vote_from_posts
+from scrape import max_page_number_from_page, posts_from_page, \
+	process_vote_from_posts, ParsedVote
 from commands import run_console_command
 from commands_undo import UndoStack
+from vote import MergeableVote
 from display import display_vote
+
+import os, os.path, pickle, re
 
 ###############
 ## Core Loop ##
 ###############
+
+MEMO_FILE_REGEX = re.compile(r'to_(\d+)\.memo')
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description='Process quest votes on SB/SV.')
@@ -115,24 +120,64 @@ if __name__ == '__main__':
 			elif post.id > postno and (qm is None or post.author != qm):
 				posts.append(post)
 
+	if not len(posts):
+		error(errstr.NO_POSTS)
+		exit(1)
+
 	if not has_id:
 		acknowledge_warning(errstr.COULDNT_FIND_NAMED_POST)
 
-	v, votes_for_user = process_vote_from_posts(posts)
+	# Load a memo file if possible (and the user wants that)
+	memo_dir = os.path.expanduser(
+		'~/.tabulon/'+dom.lower()+'/'+str(threadno)+'/'+str(postno)+'/'
+	)
+
+	memo_freeform = memo_mergeable = None
+
+	if os.path.exists(memo_dir):
+		# There could be applicable memo files!
+
+		best = None
+
+		for memo_file in os.listdir(memo_dir):
+			match = MEMO_FILE_REGEX.match(memo_file)
+			if match:
+				last = int(match.group(1))
+				if last > best and last <= posts[-1].id:
+					# I think this generally makes sense, but it adds a weird situation
+					# -- if the last vote gets deleted, we can't use the last memo.
+					best = last
+
+		if best and raw_input('Load memo data? (Y/n) ').strip().lower() != 'n':
+			best_path = memo_dir+'to_'+str(best)+'.memo'
+			memo_mergeable, memo_freeform = pickle.load(open(best_path, 'rb'))
+
+	v, parsed_votes, votes_for_user = \
+		process_vote_from_posts(posts, memo_freeform, memo_mergeable)
+
 	us = UndoStack(v)
 
 	sleep(1)
 
 	while True:
-		if args.disable_color:
+		try:
+			if args.disable_color:
+				print
+				print
+			else:
+				print CLEAR_DISPLAY
+			mapping = display_vote(v)
 			print
-			print
-		else:
-			print CLEAR_DISPLAY
-		mapping = display_vote(v)
-		print
-		command = raw_input("> ").strip()
+			command = raw_input("> ").strip()
 
-		v = run_console_command(v, us, mapping, command, votes_for_user)
+			v = run_console_command(v, us, mapping, command, votes_for_user)
 
-		sleep(1)
+			sleep(1)
+		except KeyboardInterrupt:
+			if raw_input('Save memo data? (Y/n) ').strip().lower() != 'n':
+				if not os.path.exists(memo_dir):
+					os.makedirs(memo_dir)
+				memo_file = memo_dir + 'to_'+str(posts[-1].id)+'.memo'
+				us.teardown()
+				pickle.dump((v, parsed_votes), open(memo_file, 'wb'), 1)
+			break

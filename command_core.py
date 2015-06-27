@@ -2,6 +2,10 @@
 # Copyright (c) 2015 BeaconHill <theageofnewstars@gmail.com>
 # See `LICENSE.txt` for license terms.
 
+##########################
+## Core Command Objects ##
+##########################
+
 class CommandError(Exception):
 	def __init__(self, *args):
 		self.message = ' '.join([str(a) for a in args])
@@ -30,3 +34,5 @@ class Command(object):
 		# return a long (potentially with newlines) description of this command
 		# or None
 		return None
+	def unlisted(self):
+		return False

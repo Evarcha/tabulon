@@ -58,6 +58,8 @@ class Remove(Command):
 
 	def go(self, args, model):
 		idx = parse_line_number(args, model.mapping)
+		if not model.mapping[idx].parent:
+			raise CommandError(errstr.CANT_REMOVE_ROOT_NODE)
 		model.mapping[idx].remove_self()
 	def description(self):
 		return 'Remove a line.'
@@ -150,3 +152,15 @@ class Invert(Command):
 	def go(self, args, model):
 		idx = parse_line_number(args, model.mapping)
 		model.mapping[idx].invert()
+
+class Recompute(Command):
+	def names(self):
+		return ['recompute']
+	def description(self):
+		return 'Recompute vote totals from IVs. For testing only.'
+	def usage(self):
+		return ['recompute']
+	def go(self, args, model):
+		model.vote.recompute_votes()
+	def unlisted(self):
+		return True

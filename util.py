@@ -50,8 +50,9 @@ ERR_BAD_URL = 'That URL didn\'t lead to a Sufficient Velocity or SpaceBattles po
 # Matches yield three parameters, the thread ID, the page number (possibly None)
 # and the post ID
 THREAD_ID_REGEX = re.compile(\
-	r"^https?://forums\.(?:sufficientvelocity|spacebattles)\.com/threads/"+\
-	r"[A-Za-z0-9\-]*\.(\d*)/(?:page-(\d*))?#post-(\d*)$"\
+	r"^https?://forum"+ \
+	r"(?:s\.sufficientvelocity|s\.spacebattles|\.questionablequesting)\.com"+ \
+	r"/threads/[A-Za-z0-9\-]*\.(\d*)/(?:page-(\d*))?#post-(\d*)$"\
 )
 
 def make_page_url(domain, thread, page):
