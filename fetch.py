@@ -10,20 +10,54 @@ from lxml import html
 import requests
 from util import *
 from termutil import *
+from getpass import getpass
+import os, os.path
 
 ####################
 ## Fetching Utils ##
 ####################
 
+_session = requests.Session()
+
 # Fetch this one uri
 def single_fetch(uri):
-	return html.fromstring(requests.get(uri).text)
+	return html.fromstring(_session.get(uri).text)
 
 # Fetch this one uri, returning the final uri after redirects
 # Returns a tuple (lxml.html, uri)
 def single_fetch_resolve_redirects(uri):
-	response = requests.get(uri)
+	response = _session.get(uri)
 	return (html.fromstring(response.text), response.url)
+
+def log_in_to_forum(scheme, host):
+	print 'Trying to log in to '+host+'.'
+	print
+
+	while True:
+		un = raw_input('Username: ')
+		pw = getpass()
+		print
+
+		uri = scheme+'://'+host+'/login/login'
+
+		response = _session.post(uri,
+			data={
+					'login': un,
+					'password': pw,
+					'register': '0',
+					'remember': '1',
+					'redirect': '/watched/threads',
+					'_xfToken': '',
+					'cookie_check': '0',
+			},
+		)
+
+		if url_get_path(response.url) != '/watched/threads':
+			print 'Oops, that didn\'t seem to work. Try again?'
+			print
+		else:
+			break
+
 
 def _multi_fetch_thread(uriq, out, print_progress):
 	while True:

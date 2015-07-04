@@ -18,6 +18,12 @@ def uniq(a):
 def url_get_domain(url):
 	return urlparse.urlparse(url).netloc
 
+def url_get_path(url):
+	return urlparse.urlparse(url).path
+
+def url_get_scheme(url):
+	return urlparse.urlparse(url).scheme
+
 # returns a pretty terminal-colored diff and a similarity ratio
 def diff_strings(a, b):
 	sm = difflib.SequenceMatcher(None, a, b, False)
@@ -47,6 +53,13 @@ def diff_strings(a, b):
 
 ERR_BAD_URL = 'That URL didn\'t lead to a Sufficient Velocity or SpaceBattles post.'
 
+# keep this in sync with the regex below
+OK_FORUM_DOMAINS = [
+	'forums.sufficientvelocity.com',
+	'forums.spacebattles.com',
+	'forum.questionablequesting.com',
+]
+
 # Matches yield three parameters, the thread ID, the page number (possibly None)
 # and the post ID
 THREAD_ID_REGEX = re.compile(\
@@ -55,9 +68,9 @@ THREAD_ID_REGEX = re.compile(\
 	r"/threads/[A-Za-z0-9\-]*\.(\d*)/(?:page-(\d*))?#post-(\d*)$"\
 )
 
-def make_page_url(domain, thread, page):
+def make_page_url(protocol, domain, thread, page):
 	return \
-		'http://'+domain+'/threads/.%d/page-%d' % (thread, page)
+		protocol+'://'+domain+'/threads/.%d/page-%d' % (thread, page)
 
 # returns a tuple (thread ID, page number, post ID) from a
 # post URL. returns None if the post URL is not well formed.

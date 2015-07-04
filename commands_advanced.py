@@ -191,7 +191,7 @@ class RegexMoveRename(Command):
 		return [
 			r"moveregex r0 1 /^Flee (east|west)!/Run \1!/",
 			'moveregex R0-r26 27 '+\
-				r"/Tay?lor's (?:cape )?name [sa]hould be ([^.]*)\.?/\1/"
+				r"/Tay?lor's (?:cape )?name [sa]houl?d be ([^.]*)\.?/\1/"
 		]
 	def go(self, args, model):
 		slashpos = args.find('/')
