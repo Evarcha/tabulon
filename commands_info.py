@@ -77,3 +77,41 @@ class BBCode(Command):
 		return 'Print out the vote in BBCode, fit for copy-pasting.'
 	def usage(self):
 		return ['bbcode']
+
+class BBCodeExtended(Command):
+	def names(self):
+		return ['bbext', 'bbx']
+	def go(self, args, model):
+		print
+		mapping = display_vote_bb(model.vote)
+		print
+		print '[spoiler=Details]'
+
+		voters = model.vote.yea | model.vote.nay
+		print '[b]All Voters: ([/b]%d[b])[/b]' % len(voters), ', '.join(voters)
+		print
+
+		for i in xrange(1, len(mapping)):
+			line = mapping[i]
+			print '[spoiler=#%d %s]' % (i, line.primary_text.replace(']', ''))
+
+			print '[b]Texts:[/b]'
+			print '[indent]'+line.primary_text
+			for text in line.texts - set([line.primary_text]):
+				print text
+			print '[/indent]'
+
+			print '[b]Yeas: ([/b]%d[b])[/b]' % len(line.yea), ', '.join(line.yea)
+			print '[b]Nays: ([/b]%d[b])[/b]' % len(line.nay), ', '.join(line.nay)
+
+			print '[/spoiler]'
+		print '[/spoiler]'
+
+		print
+
+		wait_for_line()
+	def description(self):
+		return 'Print out the vote in BBCode, fit for copy-pasting, with an '+\
+			'extra spoilered Details section providing more information.'
+	def usage(self):
+		return ['bbx']

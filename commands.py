@@ -109,6 +109,7 @@ COMMAND_LIST = [
 	TypoJam(),
 	SetMath(),
 	BBCode(),
+	BBCodeExtended(),
 	Undo(),
 	Redo(),
 	Quit(),

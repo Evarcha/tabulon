@@ -104,6 +104,7 @@ if __name__ == '__main__':
 		error(errstr.START_STOP_DOMAIN_MISMATCH)
 		exit(1)
 
+	print start_uri
 	threadno, pageno, postno = get_url_info_or_die(start_uri)
 
 	if not stop_uri:
