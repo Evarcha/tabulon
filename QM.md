@@ -38,6 +38,6 @@ It looks like there aren't any more merges needed here; but, yikes, this is stil
 
 There's also one more thing to check up on: line #22 is a really awful pun. Find out who inflicted it on the vote totals with `blame 22`. Looks like someone is living up to their name, haha...
 
-This is about as good as it's going to get; I should now use the `bbcode` command to write the results out as BBCode, so I can copy-paste it into my update.
+This is about as good as it's going to get; I should now use the `copybbcode` command to copy the results to the clipboard as BBCode, so I can paste it into my update. (If you don't have the required `pyperclip` module installed to use this command, you can also use the regular `bbcode` command and copy it yourself.)
 
 Once you're done with that, type `quit` to close Tabulon. Time to get writing!

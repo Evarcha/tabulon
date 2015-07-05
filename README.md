@@ -1,6 +1,6 @@
 # Tabulon
 
-Tabulon is a system for managing votes in Sufficient Velocity and SpaceBattles quests. It is written in Python 2, and requires the `lxml` and `requests` libraries to be installed. It was written for my [*Camp Cauldron Lake*](http://forums.sufficientvelocity.com/threads/camp-cauldron-lake-worm.18602/) quest on Sufficient Velocity.
+Tabulon is a system for managing votes in Sufficient Velocity and SpaceBattles quests. It is written in Python 2, and requires the `lxml` and `requests` libraries to be installed. The `pyperclip` module is optional, but will enable clipboard functionality. Tabulon was written for my [*Camp Cauldron Lake*](http://forums.sufficientvelocity.com/threads/camp-cauldron-lake-worm.18602/) quest on Sufficient Velocity.
 
 Tabulon "thinks" somewhat differently from SV's other vote counters. Where they seem optimized for bandwagons, to pick the most-liked vote in its entirety, Tabulon prefers to synthesize, to surface the most-liked individual options and allow the QM to gather those into a coherent course of action.
 

@@ -39,13 +39,10 @@ def _display_vote(vote, mapping, indent):
 
 	return mapping
 
-def display_vote_bb(vote):
-	out = _display_vote_bb(vote, [])
-	stdout.write('\n')
-	stdout.flush()
-	return out
+def get_vote_bb(vote):
+	return _get_vote_bb(vote, [])
 
-def _display_vote_bb(vote, mapping):
+def _get_vote_bb(vote, mapping):
 	plusminus =	\
 		'[b][color=green]'+(' +%-2d' % len(vote.yea)) +	\
 		'[/color][color=red]'+(' -%-2d '% len(vote.nay)) +	\
@@ -53,16 +50,46 @@ def _display_vote_bb(vote, mapping):
 	text = vote.primary_text
 	number = '#' + str(len(mapping))
 
-	stdout.write(number+plusminus+text)
+	out = number+plusminus+text
 
 	mapping.append(vote)
 
 	if len(vote.subs):
-		stdout.write('\n[indent]')
+		out += '\n[indent]'
 		for sub in vote.subs[:-1]:
-			_display_vote_bb(sub, mapping)
-			stdout.write('\n')
-		_display_vote_bb(vote.subs[-1], mapping)
-		stdout.write('[/indent]')
+			out += _get_vote_bb(sub, mapping)
+			out += '\n'
+		_get_vote_bb(vote.subs[-1], mapping)
+		out += '[/indent]'
 
-	return mapping
+	return out
+
+def get_blame_bb(mapping):
+	out = '[spoiler=Details]'
+
+	voters = mapping[0].yea | mapping[0].nay
+	out += '[b]All Voters: ([/b]%d[b])[/b]' % len(voters)
+	out += (', '.join(voters)).encode('utf-8')
+	out += '\n\n'
+
+
+	for i in xrange(1, len(mapping)):
+		line = mapping[i]
+		out += '[spoiler=#%d %s]\n' % (i, line.primary_text.replace(']', ''))
+
+		out += '[b]Texts:[/b]'
+		out += '[indent]'+line.primary_text+'\n'
+		for text in line.texts - set([line.primary_text]):
+			out += text+'\n'
+		out += '[/indent]\n'
+
+		out += '[b]Yeas: ([/b]%d[b])[/b]' % len(line.yea)
+		out += (', '.join(line.yea)).encode('utf-8')
+		out += '\n'
+
+		out += '[b]Nays: ([/b]%d[b])[/b]' % len(line.nay)
+		out += (', '.join(line.nay)).encode('utf-8')
+		out += '\n'
+
+		out += '[/spoiler]'
+	return out + '[/spoiler]'

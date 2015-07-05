@@ -4,7 +4,8 @@
 
 from command_core import *
 from command_util import *
-from display import display_vote_bb
+import tboard
+from display import get_vote_bb, get_blame_bb
 import errstr
 
 ##########################
@@ -84,48 +85,53 @@ class BBCode(Command):
 		return ['bbcode', 'bb']
 	def go(self, args, model):
 		print
-		display_vote_bb(model.vote)
+		print get_vote_bb(model.vote)
 		print
+
 		wait_for_line()
 	def description(self):
-		return 'Print out the vote in BBCode, fit for copy-pasting.'
+		return 'Print out the vote in BBCode.'
 	def usage(self):
 		return ['bbcode']
 
 class BBCodeExtended(Command):
 	def names(self):
-		return ['bbext', 'bbx']
+		return ['bbblame', 'bbx']
 	def go(self, args, model):
 		print
-		mapping = display_vote_bb(model.vote)
+		print get_vote_bb(model.vote)
 		print
-		print '[spoiler=Details]'
-
-		voters = model.vote.yea | model.vote.nay
-		print '[b]All Voters: ([/b]%d[b])[/b]' % len(voters), ', '.join(voters)
-		print
-
-		for i in xrange(1, len(mapping)):
-			line = mapping[i]
-			print '[spoiler=#%d %s]' % (i, line.primary_text.replace(']', ''))
-
-			print '[b]Texts:[/b]'
-			print '[indent]'+line.primary_text
-			for text in line.texts - set([line.primary_text]):
-				print text
-			print '[/indent]'
-
-			print '[b]Yeas: ([/b]%d[b])[/b]' % len(line.yea), ', '.join(line.yea)
-			print '[b]Nays: ([/b]%d[b])[/b]' % len(line.nay), ', '.join(line.nay)
-
-			print '[/spoiler]'
-		print '[/spoiler]'
-
+		print get_blame_bb(model.mapping)
 		print
 
 		wait_for_line()
 	def description(self):
-		return 'Print out the vote in BBCode, fit for copy-pasting, with an '+\
+		return 'Print out the vote in BBCode, with an extra spoilered Details '+\
+			'section providing more information.'
+	def usage(self):
+		return ['bbblame']
+
+class BBCodeCopy(Command):
+	def names(self):
+		return ['copybbcode', 'cbb']
+	def go(self, args, model):
+		tboard.copy(get_vote_bb(model.vote))
+	def description(self):
+		return 'Copy the vote, formatted in BBCode, to the clipboard.'
+	def usage(self):
+		return ['copybbcode']
+	def unlisted(self):
+		return not tboard.available()
+
+class BBCodeCopyExtended(Command):
+	def names(self):
+		return ['copybbblame', 'cbbx']
+	def go(self, args, model):
+		tboard.copy(get_vote_bb(model.vote)+'\n\n'+get_blame_bb(model.mapping))
+	def description(self):
+		return 'Copy the vote, formatted in BBCode, to the clipboard, with an '+\
 			'extra spoilered Details section providing more information.'
 	def usage(self):
-		return ['bbx']
+		return ['copybbblame']
+	def unlisted(self):
+		return not tboard.available()

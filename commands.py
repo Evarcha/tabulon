@@ -110,6 +110,8 @@ COMMAND_LIST = [
 	SetMath(),
 	BBCode(),
 	BBCodeExtended(),
+	BBCodeCopy(),
+	BBCodeCopyExtended(),
 	AlphaShow(),
 	Undo(),
 	Redo(),
