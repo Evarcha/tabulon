@@ -3,6 +3,7 @@
 # See `LICENSE.txt` for license terms.
 
 import re
+from display import get_formatted_vote_line
 from command_core import *
 from setmath import setmath
 import errstr
@@ -10,6 +11,26 @@ import errstr
 ###################################
 ## Helper Functions for Commands ##
 ###################################
+
+# sorted need not include all votes
+def show_sorted_vote(mapping, sorted, replacement_texts=None, extra_texts=None):
+	if replacement_texts is not None:
+		assert len(replacement_texts) == len(sorted)
+	if extra_texts is not None:
+		assert len(extra_texts) == len(sorted)
+
+	# invert the mapping so we have vote numbers
+	inv_mapping = dict((mapping[i], i) for i in xrange(len(mapping)))
+
+	for i in xrange(len(sorted)):
+		vote = sorted[i]
+		text = None
+		extra = None
+		if replacement_texts is not None:
+			text = replacement_texts[i]
+		if extra_texts is not None:
+			extra = extra_texts[i]
+		print get_formatted_vote_line(vote, inv_mapping[vote], 0, text, extra)
 
 def move(mapping, from_vote, to_vote):
 	if from_vote == to_vote:

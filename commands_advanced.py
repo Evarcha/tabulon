@@ -71,8 +71,12 @@ class TypoJam(Command):
 				wait_for_line('No matches found.')
 				return
 
-		for ratio, i, plain_diff in matches:
-			print '#%d (%4.1f%%) %s' % (i, 100*ratio, plain_diff)
+		show_sorted_vote(
+			mapping,
+			[ mapping[i] for ratio, i, plain_diff in matches ],
+			[ plain_diff for ratio, i, plain_diff in matches ],
+			[ '(%4.1f%%)' % (100*ratio) for ratio, i, plain_diff in matches ],
+		)
 
 		remove = raw_input(
 			'Accept? (ENTER accepts all, none accepts none, or you can provide '+\

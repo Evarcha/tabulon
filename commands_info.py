@@ -13,6 +13,20 @@ import errstr
 
 # All of the simple commands for displaying additional information go here.
 
+class AlphaShow(Command):
+	def names(self):
+		return ['alpha', 'as']
+	def go(self, args, model):
+		print
+		alpha = sorted(model.mapping, key=lambda x: x.primary_text.upper())
+		show_sorted_vote(model.mapping, alpha)
+		print
+		wait_for_line()
+	def description(self):
+		return 'Print the vote sorted alphabetically.'
+	def usage(self):
+		return ['alpha']
+
 class VoteOf(Command):
 	def names(self):
 		return ['voteof', 'vo']

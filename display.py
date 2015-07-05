@@ -8,16 +8,29 @@ from sys import stdout
 def display_vote(vote):
 	return _display_vote(vote, [], 0)
 
-def _display_vote(vote, mapping, indent):
+def get_formatted_vote_line(vote, index=None, indent=0, text=None, extra=None):
+	if text is None:
+		text = vote.primary_text
+
+	if extra is None:
+		extra = ''
+
 	spaces = '  '*indent
 	plusminus =	\
 		sgr(FG_GRN, BOLD)+(' +%-2d' % len(vote.yea)) +	\
 		sgr(FG_RED, BOLD)+(' -%-2d '% len(vote.nay)) +	\
 		sgr()
-	text = vote.primary_text
-	number = ('#%d   ' % len(mapping))[:max(4, len(str(len(mapping))))]
+	if index is not None:
+		number = '#'+str(index)
+		if len(number) < 4:
+			number += ' ' * ( 4 - len(number) )
+	else:
+		number = ''
 
-	print spaces+number+plusminus+text
+	return spaces+number+extra+plusminus+text
+
+def _display_vote(vote, mapping, indent):
+	print get_formatted_vote_line(vote, len(mapping), indent)
 
 	mapping.append(vote)
 
