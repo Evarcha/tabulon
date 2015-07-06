@@ -137,12 +137,18 @@ class ParsedVote(object):
 
 	def navigate(self, text):
 		if text not in self.subs:
-			self.subs[text] = ParsedVote(text, self)
+			self.subs[text] = new_iv = ParsedVote(text, self)
 
 			if self.mv_mode:
 				# need to make a new mergeable vote as well
 				mv = self._get_mv()
-				mv.add(MergeableVote(self.subs[text], None))
+				new_mv = MergeableVote(new_iv, None)
+				mv.add(new_mv)
+
+				# set up mv mode on the new iv, otherwise children of newly added ivs
+				# won't get mvs and everything will be terrible
+				new_iv.set_mv_mode(True)
+				new_iv._set_mv(new_mv)
 
 		return self.subs[text]
 
