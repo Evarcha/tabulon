@@ -59,7 +59,7 @@ def _get_vote_bb(vote, mapping):
 		for sub in vote.subs[:-1]:
 			out += _get_vote_bb(sub, mapping)
 			out += '\n'
-		_get_vote_bb(vote.subs[-1], mapping)
+		out += _get_vote_bb(vote.subs[-1], mapping)
 		out += '[/indent]'
 
 	return out
