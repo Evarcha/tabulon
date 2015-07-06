@@ -81,6 +81,7 @@ class MergeableVote(object):
 	# pass either text or iv, but not both
 	def __init__(self, iv=None, parent=None, text=None):
 		self.stack = None
+		self.hidden = False
 		if text is not None:
 			self.parent = parent
 			self.primary_text = text
@@ -106,12 +107,36 @@ class MergeableVote(object):
 	def _set_stack(self, stack):
 		self.stack = stack
 
+	def hide(self):
+		self.dirty()
+		self.hidden = True
+		for sub in self.subs:
+			sub.hide()
+
+	def unhide(self):
+		self.dirty()
+		self.hidden = False
+		if self.parent:
+			self.parent.unhide()
+
 	def recompute_votes(self):
 		self.dirty()
-		self.yea, self.nay = self.vote_ivs.get_votes()
+
+		all_subs_hidden = True
 		for sub in self.subs:
 			sub.recompute_votes()
+			if not sub.hidden:
+				all_subs_hidden = False
 		self._sort()
+
+		new_yea, new_nay = self.vote_ivs.get_votes()
+
+		if not len(new_yea) and not len(new_nay) and all_subs_hidden:
+			self.hidden = True
+		elif self.hidden and ( new_yea != self.yea or new_nay != self.nay ):
+			self.unhide()
+
+		self.yea, self.nay = new_yea, new_nay
 
 	# should only be called from iv_setup_mv_mode
 	def _mark_ivs(self):
@@ -131,6 +156,7 @@ class MergeableVote(object):
 
 	def rename(self, new_text):
 		self.dirty()
+		self.unhide()
 		self.texts.add(new_text)
 		self.primary_text = new_text
 
@@ -143,6 +169,7 @@ class MergeableVote(object):
 
 	def trickle(self):
 		self.dirty()
+		self.unhide()
 		for sub in self.subs:
 			self._trickle(sub)
 		self.nay.difference_update(self.yea)
@@ -164,12 +191,14 @@ class MergeableVote(object):
 
 	def remove_self(self):
 		self.dirty()
+		self.hidden = False
 		if self.parent:
 			self.parent.subs.remove(self)
 			self.parent = None
 
 	def add(self, other):
 		self.dirty()
+		self.unhide()
 		other.remove_self()
 
 		merged = False
@@ -188,6 +217,7 @@ class MergeableVote(object):
 	# this is used as part of a multimerge
 	def copy(self, other):
 		self.dirty()
+		self.unhide()
 		assert other != self
 
 		self.yea.update(other.yea)
@@ -209,6 +239,7 @@ class MergeableVote(object):
 
 	def merge(self, other):
 		self.dirty()
+		self.unhide()
 		assert other != self
 		assert not self.is_descendant_of(other)
 		other.remove_self()

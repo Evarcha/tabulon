@@ -5,8 +5,8 @@
 from termutil import *
 from sys import stdout
 
-def display_vote(vote):
-	return _display_vote(vote, [], 0)
+def display_vote(vote, show_hidden=False):
+	return _display_vote(vote, [], 0, show_hidden)
 
 def get_formatted_vote_line(vote, index=None, indent=0, text=None, extra=None):
 	if text is None:
@@ -29,13 +29,17 @@ def get_formatted_vote_line(vote, index=None, indent=0, text=None, extra=None):
 
 	return spaces+number+extra+plusminus+text
 
-def _display_vote(vote, mapping, indent):
+def _display_vote(vote, mapping, indent, show_hidden):
 	print get_formatted_vote_line(vote, len(mapping), indent)
 
 	mapping.append(vote)
 
-	for sub in vote.subs:
-		_display_vote(sub, mapping, indent+1)
+	subs = vote.subs
+	if not show_hidden:
+		subs = filter(lambda x: not x.hidden, vote.subs)
+
+	for sub in subs:
+		_display_vote(sub, mapping, indent+1, show_hidden)
 
 	return mapping
 
@@ -54,12 +58,16 @@ def _get_vote_bb(vote, mapping):
 
 	mapping.append(vote)
 
-	if len(vote.subs):
+	subs = filter(lambda x: not x.hidden, vote.subs)
+
+	if len(subs):
 		out += '\n[indent]'
-		for sub in vote.subs[:-1]:
+		for sub in subs[:-1]:
+			if sub.hidden:
+				continue
 			out += _get_vote_bb(sub, mapping)
 			out += '\n'
-		out += _get_vote_bb(vote.subs[-1], mapping)
+		out += _get_vote_bb(subs[-1], mapping)
 		out += '[/indent]'
 
 	return out
@@ -68,7 +76,7 @@ def get_blame_bb(mapping):
 	out = '[spoiler=Details]'
 
 	voters = mapping[0].yea | mapping[0].nay
-	out += '[b]All Voters: ([/b]%d[b])[/b]' % len(voters)
+	out += '[b]All Voters: ([/b]%d[b])[/b] ' % len(voters)
 	out += (', '.join(voters)).encode('utf-8')
 	out += '\n\n'
 
@@ -83,11 +91,11 @@ def get_blame_bb(mapping):
 			out += text+'\n'
 		out += '[/indent]\n'
 
-		out += '[b]Yeas: ([/b]%d[b])[/b]' % len(line.yea)
+		out += '[b]Yeas: ([/b]%d[b])[/b] ' % len(line.yea)
 		out += (', '.join(line.yea)).encode('utf-8')
 		out += '\n'
 
-		out += '[b]Nays: ([/b]%d[b])[/b]' % len(line.nay)
+		out += '[b]Nays: ([/b]%d[b])[/b] ' % len(line.nay)
 		out += (', '.join(line.nay)).encode('utf-8')
 		out += '\n'
 

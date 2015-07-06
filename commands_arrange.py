@@ -65,6 +65,28 @@ class Remove(Command):
 		return 'Remove a line.'
 	def usage(self):
 		return ['remove 1']
+	def info(self):
+		return """The difference between removing and hiding is that removed votes
+will never reappear and cannot be restored. Hidden votes will reappear if new
+people vote for them, and can also be restored using the showhidden command."""
+
+class Hide(Command):
+	def names(self):
+		return ['hide', 'h']
+
+	def go(self, args, model):
+		idx = parse_line_number(args, model.mapping)
+		if not model.mapping[idx].parent:
+			raise CommandError(errstr.CANT_HIDE_ROOT_NODE)
+		model.mapping[idx].hide()
+	def description(self):
+		return 'Hide a line.'
+	def usage(self):
+		return ['hide 1']
+	def info(self):
+		return """The difference between hiding and removing is that hidden votes
+will reappear if new people vote for them, and can also be restored using the
+showhidden command. Removed votes will never reappear and cannot be restored."""
 
 class Add(Command):
 	def names(self):

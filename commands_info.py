@@ -4,8 +4,9 @@
 
 from command_core import *
 from command_util import *
+from termutil import CLEAR_DISPLAY
 import tboard
-from display import get_vote_bb, get_blame_bb
+from display import get_vote_bb, get_blame_bb, display_vote
 import errstr
 
 ##########################
@@ -19,7 +20,7 @@ class AlphaShow(Command):
 		return ['alpha', 'as']
 	def go(self, args, model):
 		print
-		alpha = sorted(model.mapping, key=lambda x: x.primary_text.upper())
+		alpha = sorted(model.mapping[1:], key=lambda x: x.primary_text.upper())
 		show_sorted_vote(model.mapping, alpha)
 		print
 		wait_for_line()
@@ -27,6 +28,26 @@ class AlphaShow(Command):
 		return 'Print the vote sorted alphabetically.'
 	def usage(self):
 		return ['alpha']
+
+class ShowHidden(Command):
+	def names(self):
+		return ['showhidden', 'shh']
+	def go(self, args, model):
+		print CLEAR_DISPLAY
+		hidden_mapping = display_vote(model.vote, True)
+		print
+
+		while True:
+			remove = raw_input('Unhide? ')
+			if not remove.strip():
+				break
+
+			vote = parse_line_number(remove, hidden_mapping)
+			hidden_mapping.unhide[vote]
+	def description(self):
+		return 'Show the vote with "hidden" vote lines included.'
+	def usage(self):
+		return ['showhidden']
 
 class VoteOf(Command):
 	def names(self):
