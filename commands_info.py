@@ -148,7 +148,7 @@ class BBCodeCopyExtended(Command):
 	def names(self):
 		return ['copybbblame', 'cbbx']
 	def go(self, args, model):
-		tboard.copy(get_vote_bb(model.vote)+'\n\n'+get_blame_bb(model.mapping))
+		tboard.copy(get_vote_bb(model.vote)+'\n\n\n'+get_blame_bb(model.mapping))
 	def description(self):
 		return 'Copy the vote, formatted in BBCode, to the clipboard, with an '+\
 			'extra spoilered Details section providing more information.'
