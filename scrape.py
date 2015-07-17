@@ -218,11 +218,11 @@ def process_vote_from_posts(posts, freeform=None, mergeable=None):
 		munged_author = post.author.lower().replace(' ', '')
 
 		# check for a bandwagon vote
-		text = vote_lines[0].text.lstrip('@').rstrip('.!')
+		text = vote_lines[0].text.lstrip('@ ').rstrip('.! ')
 		text = text.lower().replace(' ', '')
 		if text in last_votes_from_person and text != munged_author and \
 			vote_lines[0].type in POSITIVE_VOTE_LINE_TYPES:
-			
+
 			vote_lines = last_votes_from_person[text] + vote_lines[1:]
 
 		# store the current vote (with bandwagon alterations)
