@@ -18,6 +18,7 @@ import os, os.path
 ####################
 
 _session = requests.Session()
+_session.headers.update({'User-Agent': 'Tabulon/1.0'})
 
 # Fetch this one uri
 def single_fetch(uri):
