@@ -26,5 +26,12 @@ def copy(string):
 	else:
 		acknowledge_warning(errstr.NO_CLIPBOARD)
 
+def paste():
+	if has_pyperclip:
+		return pyperclip.paste()
+	else:
+		acknowledge_warning(errstr.NO_CLIPBOARD)
+		return ''
+
 def available():
 	return has_pyperclip
