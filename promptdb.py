@@ -24,7 +24,7 @@ def expand_site(site):
 	if not site:
 		return ''
 	site = idx(site_expansions, site, site)
-	return 'on '+site
+	return ' on '+site
 
 def idx(dictionary, key, default=None):
 	if key in dictionary:
@@ -68,8 +68,14 @@ def slot_prompts():
 	for prompt in prompts:
 		if prompt.used:
 			continue
-		n += prompt.slots()
-		slotted_prompts.append((n, prompt.slots(), prompt))
+		slots = prompt.slots()
+		
+		if slots <= 0:
+			continue
+		
+		n += slots
+		
+		slotted_prompts.append((n, slots, prompt))
 	return slotted_prompts
 
 class Prompt(object):
@@ -101,16 +107,23 @@ class Prompt(object):
 		self.used = True
 		self.usedWhen = time()
 	def slots(self):
-		return 15+self.score+self.timescore()
+		score = self.score
+		#if score > 0:
+		#	score = int(floor(1.7**score))
+	
+		return max(0, 2*(4+score+self.timescore()))
 	def see(self):
 		self.seen = time()
 	def timescore(self):
-		return min(
-			10,
-			floor(log(( time() - self.seen ) / ( 60*60*24.0 ))/log(1.614))
-		)
-	def printBBCode(self):
-		print '[quote='+self.poster+expand_site(self.site)+']'+self.text+'[/quote]'
+		return int(max(
+			-4,
+			min(
+				10,
+				ceil(log(( time() - self.seen ) / ( 60*60*24.0 ))/log(1.614))
+			)
+		))
+	def getBBCode(self):
+		return '[quote='+self.poster+expand_site(self.site)+']'+self.text+'[/quote]'
 	def makeEntry(self):
 		out = {
 			'poster': self.poster,
@@ -147,7 +160,7 @@ class Prompt(object):
 		scoretext = str(self.score)
 		if self.score >= 0:
 			scoretext = '+'+scoretext
-		print scorecolor+scoretext+sgr()
+		print scorecolor+scoretext+sgr(), self.timescore()
 
 PROMPTFILE = 'allprompts.json'
 
@@ -200,7 +213,10 @@ elif cmd == 'get':
 					pass
 				elif cmd in ['t', 'tk', 'take']:
 					prompt.use()
-					prompt.printBBCode()
+					bb = prompt.getBBCode()
+					print bb
+					if tboard.available():
+						tboard.copy(bb)
 				else:
 					continue
 				break

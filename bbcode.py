@@ -53,7 +53,11 @@ class BBSGRNode(BBParentNode):
 			sgrs = []
 	
 		mysgrs = self.getSGRs()
-		return sgr(*mysgrs)+BBParentNode.format(self, sgrs+mysgrs)+sgr()+sgr(*sgrs)
+		allsgrs = sgrs+mysgrs
+		if mysgrs:
+			return sgr(*mysgrs)+BBParentNode.format(self, allsgrs)+sgr()+sgr(*sgrs)
+		else:
+			return BBParentNode.format(self, sgrs)
 
 class BBBoldNode(BBSGRNode):
 	def getSGRs(self):
@@ -71,13 +75,37 @@ class BBStrikeNode(BBSGRNode):
 	def getSGRs(self):
 		return [FG_HRED]
 
+class BBColorNode(BBSGRNode):
+	def __init__(self, arg):
+		self.transparent = arg.lower().strip() in ['transparent']
+
+	def getSGRs(self):
+		if self.transparent:
+			return [BLINK]
+		return []
+
+	@staticmethod
+	def hasArgument():
+		return True	
+
+class BBLinkNode(BBParentNode):
+	def __init__(self, arg):
+		self.url = arg
+	def format(self, sgrs=None):
+		if sgrs is None:
+			sgrs = []
+		
+		return \
+			sgr(FG_HCYN, BOLD)+BBParentNode.format(self, sgrs+[FG_HCYN, BOLD])+' '+\
+			sgr(FG_LBLU, BOLD)+'['+self.url+']'+\
+			sgr()+sgr(*sgrs)
+
+	@staticmethod
+	def hasArgument():
+		return True
+
 class BBQuoteNode(BBParentNode):
 	def __init__(self, arg):
-		if arg[0]=='"':
-			arg=arg[1:]
-		if arg[-1]=='"':
-			arg=arg[:-1]
-			
 		items = arg.split(',')
 		self.poster = items[0].strip()
 		self.postno = None
@@ -105,8 +133,8 @@ bb_normal_nodes = {
 	'u': BBUnderlineNode,
 	's': BBStrikeNode,
 	'spoiler': BBParentNode,
-	'url': BBParentNode,
-	'color': BBParentNode,
+	'url': BBLinkNode,
+	'color': BBColorNode,
 	'font': BBParentNode,
 	'size': BBParentNode
 }
@@ -193,6 +221,11 @@ def bb_custom_parse(input, node_types):
 					# We got an arg!
 					arg = interior[equals_pos+1:].strip()
 					interior = interior[:equals_pos]
+
+					if arg[0] in ['"', "'"]:
+						arg = arg[1:]
+					if arg[-1] in ['"', "'"]:
+						arg = arg[:-1]
 				
 				newtagname = interior.lower()
 							
