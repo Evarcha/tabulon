@@ -47,6 +47,10 @@ See the `LICENSE.txt` file for license terms.
 
 (For anyone who cares about this sort of thing, Tabulon uses the ISC license, a permissive open-source license like the MIT or BSD licenses but less wordy.)
 
+## Miscellaneous Tools
+
+promptdb.py: Allows for ranked storage of writing prompts. I never felt like the ranking worked quite right...
+
 ## Disclaimer
 
 I am providing code in this repository to you under an open source license. Because this is my personal repository, the license you receive to my code is from me and not from my employer.

@@ -18,7 +18,7 @@ I'm going to go through my normal process for cleaning up a vote. Be sure to fol
 
 Let's start by loading the vote from one of my quest's old updates, with
 
-	python tabulon.py https://forums.sufficientvelocity.com/posts/3679259/ https://forums.sufficientvelocity.com/posts/3687873/
+	python3 tabulon.py https://forums.sufficientvelocity.com/posts/3679259/ https://forums.sufficientvelocity.com/posts/3687873/
 
 Gosh, this vote is a mess. I *could* post it like this, but neither I nor my players would be able to make heads or tails of this. That's why most of Tabulon's functionality is actually dedicated to cleaning up vote results, to make them easier to understand for everybody. Let's get going!
 

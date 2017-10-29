@@ -1,5 +1,5 @@
 # Tabulon
-# Copyright (c) 2015 BeaconHill <theageofnewstars@gmail.com>
+# Copyright (c) 2015-2017 BeaconHill <theageofnewstars@gmail.com>
 # See `LICENSE.txt` for license terms.
 
 # Errors

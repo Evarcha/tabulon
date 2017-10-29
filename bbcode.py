@@ -7,11 +7,11 @@ class BBNode(object):
 	@staticmethod
 	def hasChildren():
 		return False
-		
+
 	@staticmethod
 	def hasArgument():
 		return False
-	
+
 	def __repr__(self):
 		return '['+self.__class__.__name__+': '+self.format([])+']'
 
@@ -26,13 +26,13 @@ class BBOmNomNode(BBNode):
 		pass
 	@staticmethod
 	def hasChildren(self):
-		return True	
+		return True
 
 class BBParentNode(BBNode):
 	def format(self, sgrs=None):
 		if sgrs is None:
 			sgrs = []
-	
+
 		try:
 			out = ''
 			for child in self.children:
@@ -42,7 +42,7 @@ class BBParentNode(BBNode):
 			pass # I have no children
 	def setChildren(self, children):
 		self.children = children
-	
+
 	@staticmethod
 	def hasChildren():
 		return True
@@ -51,7 +51,7 @@ class BBSGRNode(BBParentNode):
 	def format(self, sgrs=None):
 		if sgrs is None:
 			sgrs = []
-	
+
 		mysgrs = self.getSGRs()
 		allsgrs = sgrs+mysgrs
 		if mysgrs:
@@ -86,7 +86,7 @@ class BBColorNode(BBSGRNode):
 
 	@staticmethod
 	def hasArgument():
-		return True	
+		return True
 
 class BBLinkNode(BBParentNode):
 	def __init__(self, arg):
@@ -94,7 +94,7 @@ class BBLinkNode(BBParentNode):
 	def format(self, sgrs=None):
 		if sgrs is None:
 			sgrs = []
-		
+
 		return \
 			sgr(FG_HCYN, BOLD)+BBParentNode.format(self, sgrs+[FG_HCYN, BOLD])+' '+\
 			sgr(FG_LBLU, BOLD)+'['+self.url+']'+\
@@ -118,7 +118,7 @@ class BBQuoteNode(BBParentNode):
 			self.postno = int(kvs['post'])
 		except (ValueError, IndexError, KeyError):
 			pass
-	
+
 	def __repr__(self):
 		return '['+self.__class__.__name__+': '+self.poster+' p'+str(self.postno)+\
 			' '+self.format([])+']'
@@ -161,34 +161,34 @@ def bb_custom_parse(input, node_types):
 	node = BBParentNode()
 	tagname = None
 	children = []
-	
+
 	stack = []
-	
+
 	text_start = 0
-	
+
 	i = -1
 	while True:
 		i += 1
 		if i >= len(input):
 			break
-		
+
 		if input[i] == '[':
 			# we got the start of a tag here!
-			
+
 			end_of_tag = input.find(']', i)
-			
+
 			if end_of_tag < 0:
 				continue
-			
+
 			interior = input[i+1:end_of_tag].strip()
-			
+
 			if interior[0] == '/':
 				# Closing tag
-			
+
 				if len(stack) < 1:
 					# It's the root node! We can't close that!
 					continue
-				
+
 				# What tag do we think we're closing?
 				closing_tagname = interior[1:].strip().lower()
 
@@ -196,27 +196,27 @@ def bb_custom_parse(input, node_types):
 					# That's not the current tag name. Don't do anything, output it as a
 					# literal.
 					continue
-				
+
 				# Close the current tag.
 				if text_start != i:
 					# There's text here, add it.
 					children.append(BBTextNode(input[text_start:i]))
-				
+
 				# Set the node's children.
 				node.setChildren(children)
 
 				# Pop the stack.
 				node, tagname, children = stack.pop()
-				
+
 				# Skip past the end of the close tag.
 				i = end_of_tag
 				text_start = end_of_tag+1
 			else:
-				# We're an opening tag of some sort.				
+				# We're an opening tag of some sort.
 				arg = None
-			
+
 				equals_pos = interior.find('=')
-			
+
 				if equals_pos >= 0:
 					# We got an arg!
 					arg = interior[equals_pos+1:].strip()
@@ -226,52 +226,52 @@ def bb_custom_parse(input, node_types):
 						arg = arg[1:]
 					if arg[-1] in ['"', "'"]:
 						arg = arg[:-1]
-				
+
 				newtagname = interior.lower()
-							
-				if newtagname not in node_types:	
+
+				if newtagname not in node_types:
 					# don't know this tag
 					continue
-			
+
 				newtagclass = node_types[newtagname]
-			
+
 				if text_start != i:
 					# There's text here, add it.
 					children.append(BBTextNode(input[text_start:i]))
-			
+
 				if newtagclass.hasArgument():
 					newnode = newtagclass(arg)
 				else:
 					newnode = newtagclass()
 
 				children.append(newnode)
-						
+
 				if newtagclass.hasChildren():
 					# We don't need to add anything to the stack for nodes that don't
 					# have children.
-					
+
 					stack.append((node, tagname, children))
 					node = newnode
 					tagname = newtagname
 					children = []
-			
+
 				i = end_of_tag
 				text_start = end_of_tag+1
-	
+
 	# It's over!
 	# Add any dangling text.
 	if text_start != i:
 		children.append(BBTextNode(input[text_start:i]))
-				
+
 	# Close any unclosed tags.
 	while stack:
 		# Set the node's children.
 		node.setChildren(children)
-		
+
 		# Pop the stack.
 		node, tagname, children = stack.pop()
-	
+
 	# Set the root's children.
 	node.setChildren(children)
-		
+
 	return node

@@ -1,5 +1,5 @@
 # Tabulon
-# Copyright (c) 2015 BeaconHill <theageofnewstars@gmail.com>
+# Copyright (c) 2015-2017 BeaconHill <theageofnewstars@gmail.com>
 # See `LICENSE.txt` for license terms.
 
 ###################
@@ -9,12 +9,12 @@
 _is_ansi_enabled = True
 
 def set_ansi_enabled(ansi):
-	global _is_ansi_enabled
-	_is_ansi_enabled = ansi
+  global _is_ansi_enabled
+  _is_ansi_enabled = ansi
 
 def is_ansi_enabled():
-	global _is_ansi_enabled
-	return _is_ansi_enabled
+  global _is_ansi_enabled
+  return _is_ansi_enabled
 
 CSI = "\033["
 BEL = "\007"
@@ -64,13 +64,13 @@ INVERSE = '7'
 CLEAR_DISPLAY = CSI+'H'+CSI+'J'
 
 def sgr(*args):
-	if not is_ansi_enabled():
-		return ''
+  if not is_ansi_enabled():
+    return ''
 
-	return CSI+(';'.join(args))+"m"
+  return CSI+(';'.join(args))+"m"
 
 def pos(x, y):
-	if not is_ansi_enabled():
-		return ''
+  if not is_ansi_enabled():
+    return ''
 
-	return CSI+str(y+1)+';'+str(x+1)+'H'
+  return CSI+str(y+1)+';'+str(x+1)+'H'
